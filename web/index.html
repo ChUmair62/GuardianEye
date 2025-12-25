@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round|Material+Icons+Sharp|Material+Icons+Two+Tone|Material+Icons"
+>
+
+  
+  <meta charset="UTF-8" />
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+  <meta name="description" content="GuardianEye App" />
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-title" content="GuardianEye" />
+  <link rel="apple-touch-icon" href="icons/Icon-192.png" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png" />
+
+  <title>GuardianEye</title>
+  <link rel="manifest" href="manifest.json" />
+
+
+
+  <!-- Firebase Web SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+  <!-- Initialize Firebase -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCsOE1mAB-Xqpe5Kb1simwYYMlOFrw_nvw",
+      authDomain: "gu4rdi4n3y3.firebaseapp.com",
+      projectId: "gu4rdi4n3y3",
+      storageBucket: "gu4rdi4n3y3.appspot.com",
+      messagingSenderId: "243193667829",
+      appId: "1:243193667829:web:cfc7f9eab416bdf62ee5bc",
+      measurementId: "G-2J2KTKLMS2",
+      databaseURL: "https://gu4rdi4n3y3-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+  </script>
+
+  <!-- Flutter App CSS -->
+  <link rel="stylesheet" href="flutter.css" />
+  <script>
+    // Prevent Firebase from conflicting with Flutter service worker
+    window.addEventListener('load', function (ev) {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('flutter_service_worker.js');
+      }
+    });
+  </script>
+</head>
+
+  <script>
+  let recognition;
+  let isRecognizing = false;
+
+  function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Your browser doesn't support Speech Recognition.");
+      return;
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    window.transcribedText = '';
+
+    recognition.onresult = function (event) {
+      let interimTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          window.transcribedText += transcript + ' ';
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+      window.dispatchEvent(new CustomEvent('speechTextUpdated', {
+        detail: { finalText: window.transcribedText, interimText: interimTranscript }
+      }));
+    };
+
+    recognition.onerror = function (event) {
+      console.error('Speech Recognition Error:', event.error);
+    };
+  }
+
+  function startRecognition() {
+    if (recognition && !isRecognizing) {
+      recognition.start();
+      isRecognizing = true;
+    }
+  }
+
+  function stopRecognition() {
+    if (recognition && isRecognizing) {
+      recognition.stop();
+      isRecognizing = false;
+    }
+  }
+
+  function getFinalTranscript() {
+    return window.transcribedText;
+  }
+</script>
+
+
+  <body>
+    <script src="main.dart.js" type="application/javascript"></script>
+  </body>
+</html>

@@ -1,0 +1,56 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services" // ✅ Firebase plugin
+}
+
+android {
+    namespace "com.guardianeye.app"
+    compileSdk 36
+    ndkVersion "29.0.14206865" // ✅ Fix NDK version
+
+    defaultConfig {
+        applicationId "com.guardianeye.app"
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion 36
+        versionCode flutter.versionCode
+        versionName flutter.versionName
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true // ✅ Correct Groovy syntax
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {
+    // ✅ Desugaring support
+    
+
+    // ✅ Firebase BOM ensures all versions match
+    implementation platform('com.google.firebase:firebase-bom:32.2.0')
+
+    // ✅ Add Firebase services you use
+    implementation 'com.google.firebase:firebase-database'
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-storage'
+    implementation 'com.google.firebase:firebase-messaging'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+}

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "243193667829",
+    "firebase_url": "https://gu4rdi4n3y3-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "gu4rdi4n3y3",
+    "storage_bucket": "gu4rdi4n3y3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:243193667829:android:f3c15bfa1d5455702ee5bc",
+        "android_client_info": {
+          "package_name": "com.guardianeye.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "243193667829-l8glukq4hk31p4vn6e83j9jhce5uo9u3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.guardianeye.app",
+            "certificate_hash": "d5aa77787a71f55cd90338c379fc752b7e09e2c6"
+          }
+        },
+        {
+          "client_id": "243193667829-vvi1epfgkbb5rii09lit27t1i71dej26.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJjf4THJKmhWPOgjnFsVblG92QRzSQPvE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "243193667829-vvi1epfgkbb5rii09lit27t1i71dej26.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "243193667829-kb8jb5rch85sjh3jsm8otvevnqhb9gqc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterApplication1"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
