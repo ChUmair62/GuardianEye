@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/sidebar.dart';
 import '../widgets/topbar.dart';
+import '../widgets/animated_entry.dart';
 import '../models/suspect.dart';
 import '../services/suspect_service.dart';
 
@@ -15,55 +16,94 @@ class _SuspectsPageState extends State<SuspectsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF111111),
+      backgroundColor: Colors.transparent,
       body: SideBar(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const TopBar(title: "Suspects"),
-              const SizedBox(height: 20),
-
-              Align(
-                alignment: Alignment.centerRight,
-                child: ElevatedButton(
-                  onPressed: () => openAddDialog(context),
-                  child: const Text("Add Suspect"),
-                ),
+              const AnimatedEntry(
+                delay: 0,
+                child: TopBar(title: "Suspects"),
               ),
 
               const SizedBox(height: 20),
 
+              AnimatedEntry(
+                delay: 100,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton.icon(
+                    onPressed: () => openAddDialog(context),
+                    icon: const Icon(Icons.person_add),
+                    label: const Text("Add Suspect"),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
               Expanded(
-                child: StreamBuilder<List<Suspect>>(
-                  stream: SuspectService.streamSuspects(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+                child: AnimatedEntry(
+                  delay: 200,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A1A1A),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: StreamBuilder<List<Suspect>>(
+                      stream: SuspectService.streamSuspects(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
 
-                    final suspects = snapshot.data!;
+                        final suspects = snapshot.data!;
 
-                    return PaginatedDataTable(
-                      header: const Text("Suspects List"),
-                      rowsPerPage: 8,
-                      columns: const [
-                        DataColumn(label: Text("Name")),
-                        DataColumn(label: Text("Age")),
-                        DataColumn(label: Text("Gender")),
-                        DataColumn(label: Text("Address")),
-                        DataColumn(label: Text("Case No")),
-                        DataColumn(label: Text("Notes")),
-                        DataColumn(label: Text("Actions")),
-                      ],
-                      source: _SuspectsTableSource(
-                        suspects,
-                        onEdit: (s) => openEditDialog(context, s),
-                        onDelete: (s) =>
-                            SuspectService.deleteSuspect(s.id),
-                      ),
-                    );
-                  },
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            cardColor: const Color(0xFF1A1A1A),
+                            dividerColor: Colors.white12,
+                            dataTableTheme: const DataTableThemeData(
+                              headingTextStyle: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              dataTextStyle: TextStyle(
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ),
+                          child: PaginatedDataTable(
+                            header: const Text(
+                              "Suspects List",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            rowsPerPage: 8,
+                            columns: const [
+                              DataColumn(label: Text("Name")),
+                              DataColumn(label: Text("Age")),
+                              DataColumn(label: Text("Gender")),
+                              DataColumn(label: Text("Address")),
+                              DataColumn(label: Text("Case No")),
+                              DataColumn(label: Text("Notes")),
+                              DataColumn(label: Text("Actions")),
+                            ],
+                            source: _SuspectsTableSource(
+                              suspects,
+                              onEdit: (s) => openEditDialog(context, s),
+                              onDelete: (s) =>
+                                  SuspectService.deleteSuspect(s.id),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -73,7 +113,8 @@ class _SuspectsPageState extends State<SuspectsPage> {
     );
   }
 
-  // ADD DIALOG
+  // ========================= DIALOGS =========================
+
   void openAddDialog(BuildContext context) {
     final name = TextEditingController();
     final age = TextEditingController();
@@ -82,53 +123,33 @@ class _SuspectsPageState extends State<SuspectsPage> {
     final caseNo = TextEditingController();
     final notes = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Add Suspect"),
-        content: SizedBox(
-          width: 400,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                field(name, "Name"),
-                field(age, "Age", number: true),
-                genderDropdown((val) => gender = val!),
-                field(address, "Address"),
-                field(caseNo, "Case Number"),
-                field(notes, "Notes"),
-              ],
-            ),
+    _showSuspectDialog(
+      context,
+      title: "Add Suspect",
+      onSave: () {
+        SuspectService.addSuspect(
+          Suspect(
+            id: "",
+            name: name.text,
+            age: int.tryParse(age.text) ?? 0,
+            gender: gender,
+            address: address.text,
+            caseNumber: caseNo.text,
+            notes: notes.text,
           ),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel")),
-
-          ElevatedButton(
-            onPressed: () {
-              SuspectService.addSuspect(
-                Suspect(
-                  id: "",
-                  name: name.text,
-                  age: int.tryParse(age.text) ?? 0,
-                  gender: gender,
-                  address: address.text,
-                  caseNumber: caseNo.text,
-                  notes: notes.text,
-                ),
-              );
-              Navigator.pop(context);
-            },
-            child: const Text("Add"),
-          ),
-        ],
-      ),
+        );
+      },
+      fields: [
+        _darkField(name, "Name"),
+        _darkField(age, "Age", number: true),
+        _genderDropdown((v) => gender = v!, selected: gender),
+        _darkField(address, "Address"),
+        _darkField(caseNo, "Case Number"),
+        _darkField(notes, "Notes"),
+      ],
     );
   }
 
-  // EDIT DIALOG
   void openEditDialog(BuildContext context, Suspect s) {
     final name = TextEditingController(text: s.name);
     final age = TextEditingController(text: s.age.toString());
@@ -137,43 +158,69 @@ class _SuspectsPageState extends State<SuspectsPage> {
     final caseNo = TextEditingController(text: s.caseNumber);
     final notes = TextEditingController(text: s.notes);
 
+    _showSuspectDialog(
+      context,
+      title: "Edit Suspect",
+      onSave: () {
+        SuspectService.updateSuspect(
+          Suspect(
+            id: s.id,
+            name: name.text,
+            age: int.tryParse(age.text) ?? 0,
+            gender: gender,
+            address: address.text,
+            caseNumber: caseNo.text,
+            notes: notes.text,
+          ),
+        );
+      },
+      fields: [
+        _darkField(name, "Name"),
+        _darkField(age, "Age", number: true),
+        _genderDropdown((v) => gender = v!, selected: gender),
+        _darkField(address, "Address"),
+        _darkField(caseNo, "Case Number"),
+        _darkField(notes, "Notes"),
+      ],
+    );
+  }
+
+  // ========================= DIALOG UI =========================
+
+  void _showSuspectDialog(
+    BuildContext context, {
+    required String title,
+    required VoidCallback onSave,
+    required List<Widget> fields,
+  }) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Edit Suspect"),
+        backgroundColor: const Color(0xFF2A2A2E),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(color: Colors.white),
+        ),
         content: SizedBox(
-          width: 400,
+          width: 420,
           child: SingleChildScrollView(
-            child: Column(
-              children: [
-                field(name, "Name"),
-                field(age, "Age", number: true),
-                genderDropdown((val) => gender = val!, selected: gender),
-                field(address, "Address"),
-                field(caseNo, "Case Number"),
-                field(notes, "Notes"),
-              ],
-            ),
+            child: Column(children: fields),
           ),
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel")),
-
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              "Cancel",
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
           ElevatedButton(
             onPressed: () {
-              SuspectService.updateSuspect(
-                Suspect(
-                  id: s.id,
-                  name: name.text,
-                  age: int.tryParse(age.text) ?? 0,
-                  gender: gender,
-                  address: address.text,
-                  caseNumber: caseNo.text,
-                  notes: notes.text,
-                ),
-              );
+              onSave();
               Navigator.pop(context);
             },
             child: const Text("Save"),
@@ -183,31 +230,63 @@ class _SuspectsPageState extends State<SuspectsPage> {
     );
   }
 
-  // INPUT FIELD
-  Widget field(TextEditingController c, String hint, {bool number = false}) {
+  // ========================= FIELDS =========================
+
+  static Widget _darkField(
+    TextEditingController c,
+    String label, {
+    bool number = false,
+  }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 14),
       child: TextField(
         controller: c,
         keyboardType: number ? TextInputType.number : TextInputType.text,
+        style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
-          labelText: hint,
-          border: const OutlineInputBorder(),
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.white70),
+          filled: true,
+          fillColor: const Color(0xFF1F1F23),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Colors.white24),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide:
+                const BorderSide(color: Colors.deepPurpleAccent),
+          ),
         ),
       ),
     );
   }
 
-  // GENDER DROPDOWN
-  Widget genderDropdown(ValueChanged<String?> onChanged, {String selected = 'Male'}) {
+  static Widget _genderDropdown(
+    ValueChanged<String?> onChanged, {
+    required String selected,
+  }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 14),
       child: DropdownButtonFormField<String>(
         value: selected,
-        decoration: const InputDecoration(
+        dropdownColor: const Color(0xFF1F1F23),
+        decoration: InputDecoration(
           labelText: "Gender",
-          border: OutlineInputBorder(),
+          labelStyle: const TextStyle(color: Colors.white70),
+          filled: true,
+          fillColor: const Color(0xFF1F1F23),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Colors.white24),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide:
+                const BorderSide(color: Colors.deepPurpleAccent),
+          ),
         ),
+        style: const TextStyle(color: Colors.white),
         items: const [
           DropdownMenuItem(value: "Male", child: Text("Male")),
           DropdownMenuItem(value: "Female", child: Text("Female")),
@@ -219,14 +298,18 @@ class _SuspectsPageState extends State<SuspectsPage> {
   }
 }
 
-// TABLE SOURCE
+// ========================= TABLE SOURCE =========================
+
 class _SuspectsTableSource extends DataTableSource {
   final List<Suspect> suspects;
   final Function(Suspect) onEdit;
   final Function(Suspect) onDelete;
 
-  _SuspectsTableSource(this.suspects,
-      {required this.onEdit, required this.onDelete});
+  _SuspectsTableSource(
+    this.suspects, {
+    required this.onEdit,
+    required this.onDelete,
+  });
 
   @override
   DataRow? getRow(int index) {
@@ -242,22 +325,22 @@ class _SuspectsTableSource extends DataTableSource {
       DataCell(Row(
         children: [
           IconButton(
-              icon: const Icon(Icons.edit, color: Colors.blue),
-              onPressed: () => onEdit(s)),
+            icon: const Icon(Icons.edit, color: Colors.blue),
+            onPressed: () => onEdit(s),
+          ),
           IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => onDelete(s)),
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () => onDelete(s),
+          ),
         ],
       )),
     ]);
   }
 
   @override
-  bool get isRowCountApproximate => false;
-
-  @override
   int get rowCount => suspects.length;
-
+  @override
+  bool get isRowCountApproximate => false;
   @override
   int get selectedRowCount => 0;
 }
